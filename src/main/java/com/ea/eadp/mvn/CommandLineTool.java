@@ -42,7 +42,7 @@ public class CommandLineTool {
         Options options = preParseCommandOptions();
         CommandLine commandLine;
         try {
-            commandLine = parser.parse(options, args);
+            commandLine = parser.parse(options, args, true);
         } catch (ParseException e) {
             throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
         }

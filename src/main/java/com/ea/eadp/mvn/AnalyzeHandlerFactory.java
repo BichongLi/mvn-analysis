@@ -21,7 +21,7 @@ public class AnalyzeHandlerFactory {
     }
 
     public static AnalyzeHandler getHandler(String mode) {
-        AnalyzeMode analyzeMode = AnalyzeMode.valueOf(mode);
+        AnalyzeMode analyzeMode = AnalyzeMode.valueFromName(mode);
         return handlerMap.get(analyzeMode);
     }
 

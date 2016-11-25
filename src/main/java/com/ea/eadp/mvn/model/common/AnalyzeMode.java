@@ -1,6 +1,11 @@
 package com.ea.eadp.mvn.model.common;
 
-import org.apache.commons.lang3.StringUtils;
+import com.ea.eadp.mvn.model.exception.AnalyzeException;
+import com.ea.eadp.mvn.model.exception.ExceptionType;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User: BichongLi
@@ -9,9 +14,31 @@ import org.apache.commons.lang3.StringUtils;
  */
 public enum AnalyzeMode {
 
-    ANALYZE_DEPENDENCY;
+    ANALYZE_DEPENDENCY("dependencyAnalyze"),
+    LIST_DEPENDENCY("dependencyList");
+
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    AnalyzeMode(String name) {
+        this.name = name;
+    }
 
     public static String getDescription() {
-        return StringUtils.join(AnalyzeMode.values(), ", ");
+        List<String> modes = Arrays.stream(AnalyzeMode.values())
+                .map(AnalyzeMode::getName).collect(Collectors.toList());
+        return modes.toString();
+    }
+
+    public static AnalyzeMode valueFromName(String name) {
+        List<AnalyzeMode> matchModes = Arrays.stream(AnalyzeMode.values())
+                .filter(p -> p.getName().equals(name)).collect(Collectors.toList());
+        if (matchModes.isEmpty()) {
+            throw new AnalyzeException(ExceptionType.INVALID_REQUEST, "Unknown analyze mode: %1$s", name);
+        }
+        return matchModes.get(0);
     }
 }

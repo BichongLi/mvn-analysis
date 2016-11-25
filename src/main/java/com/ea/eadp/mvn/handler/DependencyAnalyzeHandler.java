@@ -1,6 +1,6 @@
 package com.ea.eadp.mvn.handler;
 
-import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 
 /**
  * User: BichongLi
@@ -8,8 +8,6 @@ import java.io.InputStream;
  * Time: 8:56 AM
  */
 public class DependencyAnalyzeHandler implements AnalyzeHandler {
-
-    private static final String MVN_COMMAND = "dependency:analyze";
 
     private static final DependencyAnalyzeHandler instance = new DependencyAnalyzeHandler();
 
@@ -21,12 +19,13 @@ public class DependencyAnalyzeHandler implements AnalyzeHandler {
     }
 
     @Override
-    public InputStream runCommand(String[] args) {
-        return null;
+    public ByteArrayOutputStream runCommand(String[] args) {
+        return runMVNCommand(parseRequest(args));
     }
 
     @Override
-    public void analyze(InputStream inputStream) {
-
+    public void analyze(ByteArrayOutputStream baos) {
+        System.out.println("Analyze output:");
+        System.out.println(baos.toString());
     }
 }
