@@ -1,5 +1,9 @@
 package com.ea.eadp.mvn;
 
+import com.ea.eadp.mvn.handler.AnalyzeHandler;
+import com.ea.eadp.mvn.model.common.AnalyzeMode;
+import com.ea.eadp.mvn.model.exception.AnalyzeException;
+import com.ea.eadp.mvn.model.exception.ExceptionType;
 import org.apache.commons.cli.*;
 import org.apache.maven.shared.invoker.*;
 
@@ -13,47 +17,45 @@ import java.util.Collections;
  */
 public class CommandLineTool {
 
-    private static final String POM_FILE_PARAM = "p";
-    private static final String MAVEN_HOME_PARAM = "m";
     private static final String HELP_PARAM = "h";
+    private static final String MODE_PARAM = "m";
 
     public static void main(String[] args) {
-        CommandLineParser parser = new DefaultParser();
-        try {
-            Options options = initiateCommandOptions();
-            CommandLine commandLine = parser.parse(options, args);
-
-            if (commandLine.hasOption(HELP_PARAM)) {
-                HelpFormatter formatter = new HelpFormatter();
-                formatter.printHelp("Analyze maven dependencies", options, true);
-                return;
-            }
-
-            InvocationRequest request = new DefaultInvocationRequest();
-            request.setPomFile(new File(commandLine.getOptionValue(POM_FILE_PARAM)));
-            request.setGoals(Collections.singletonList("dependency:list"));
-
-            Invoker invoker = new DefaultInvoker();
-            if (commandLine.hasOption(MAVEN_HOME_PARAM)) {
-                invoker.setMavenHome(new File(commandLine.getOptionValue(MAVEN_HOME_PARAM)));
-            }
-            invoker.execute(request);
-        } catch (ParseException | MavenInvocationException e) {
-            e.printStackTrace();
-        }
+        CommandLine commandLine = preParseArgs(args);
+        AnalyzeHandler handler = AnalyzeHandlerFactory.getHandler(commandLine.getOptionValue(MODE_PARAM));
+        handler.analyze(handler.runCommand(args));
     }
 
-    private static Options initiateCommandOptions() {
-        Option pomFile = Option.builder(POM_FILE_PARAM).argName("pom").desc("Project pom.xml file path")
-                .hasArg().build();
-        Option mavenHome = Option.builder(MAVEN_HOME_PARAM).argName("mavenHome").desc("Maven home")
-                .hasArg().build();
+    private static Options preParseCommandOptions() {
         Option help = Option.builder(HELP_PARAM).longOpt("help").build();
+        Option mode = Option.builder(MODE_PARAM)
+                .longOpt(String.format("Analyze mode: %1$s", AnalyzeMode.getDescription()))
+                .hasArg().build();
         Options options = new Options();
         options.addOption(help);
-        options.addOption(pomFile);
-        options.addOption(mavenHome);
+        options.addOption(mode);
         return options;
+    }
+
+    private static CommandLine preParseArgs(String[] args) {
+        CommandLineParser parser = new DefaultParser();
+        Options options = preParseCommandOptions();
+        CommandLine commandLine;
+        try {
+            commandLine = parser.parse(options, args);
+        } catch (ParseException e) {
+            throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
+        }
+
+        if (commandLine.hasOption(HELP_PARAM)) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("Analyze maven dependencies", options, true);
+            System.exit(1);
+        }
+        if (!commandLine.hasOption(MODE_PARAM)) {
+            throw new AnalyzeException(ExceptionType.INVALID_REQUEST, "Missing mode specified.");
+        }
+        return commandLine;
     }
 
 }
