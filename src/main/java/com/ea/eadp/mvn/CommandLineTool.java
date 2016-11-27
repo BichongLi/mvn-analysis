@@ -1,6 +1,8 @@
 package com.ea.eadp.mvn;
 
 import com.ea.eadp.mvn.handler.AnalyzeHandler;
+import com.ea.eadp.mvn.handler.DependencyAnalyzeHandler;
+import com.ea.eadp.mvn.handler.MavenCommandHandler;
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
 import com.ea.eadp.mvn.model.exception.AnalyzeException;
 import com.ea.eadp.mvn.model.exception.ExceptionType;
@@ -26,20 +28,9 @@ public class CommandLineTool {
         handler.analyze(handler.runCommand(args));
     }
 
-    private static Options preParseCommandOptions() {
-        Option help = Option.builder(HELP_PARAM).longOpt("help").build();
-        Option mode = Option.builder(MODE_PARAM)
-                .longOpt(String.format("Analyze mode: %1$s", AnalyzeMode.getDescription()))
-                .hasArg().build();
-        Options options = new Options();
-        options.addOption(help);
-        options.addOption(mode);
-        return options;
-    }
-
     private static CommandLine preParseArgs(String[] args) {
         CommandLineParser parser = new DefaultParser();
-        Options options = preParseCommandOptions();
+        Options options = MavenCommandHandler.getInstance().getOptions();
         CommandLine commandLine;
         try {
             commandLine = parser.parse(options, args, true);

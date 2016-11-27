@@ -20,6 +20,8 @@ public interface AnalyzeHandler {
 
     String MODE_PARAM = "m";
     String POM_PATH_PARAM = "p";
+    String HELP_PARAM = "h";
+    String COMMAND_PARAM = "c";
     String MVN_COMMAND = "dependency:analyze";
 
     default Options getOptions() {
@@ -28,20 +30,28 @@ public interface AnalyzeHandler {
                 .hasArg().build();
         Option pom = Option.builder(POM_PATH_PARAM).longOpt("Project pom.xml path")
                 .hasArg().build();
+        Option command = Option.builder(COMMAND_PARAM).longOpt("Maven command")
+                .hasArg().build();
+        Option help = Option.builder(HELP_PARAM).longOpt("help").build();
         Options options = new Options();
         options.addOption(mode);
         options.addOption(pom);
+        options.addOption(command);
+        options.addOption(help);
         return options;
     }
 
-    default InvocationRequest parseRequest(String args[]) {
+    default CommandLine parseCommandLine(String[] args) {
         CommandLineParser parser = new DefaultParser();
-        CommandLine commandLine;
         try {
-            commandLine = parser.parse(getOptions(), args, true);
+            return parser.parse(getOptions(), args, true);
         } catch (ParseException e) {
             throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
         }
+    }
+
+    default InvocationRequest parseRequest(String args[]) {
+        CommandLine commandLine = parseCommandLine(args);
         if (!commandLine.hasOption(POM_PATH_PARAM)) {
             throw new AnalyzeException(ExceptionType.INVALID_REQUEST, "Missing project pom.xml specified.");
         }
