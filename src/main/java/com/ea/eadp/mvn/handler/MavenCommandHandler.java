@@ -6,8 +6,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.InvocationRequest;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.*;
 import java.util.Collections;
 
 /**
@@ -15,7 +14,7 @@ import java.util.Collections;
  * Date: 11/27/2016
  * Time: 5:49 PM
  */
-public class MavenCommandHandler implements AnalyzeHandler {
+public class MavenCommandHandler extends BaseAnalyzeHandler {
 
     private static final MavenCommandHandler instance = new MavenCommandHandler();
 
@@ -38,18 +37,22 @@ public class MavenCommandHandler implements AnalyzeHandler {
         } else {
             request.setGoals(Collections.singletonList(MVN_COMMAND));
         }
+        if (commandLine.hasOption(MAVEN_HOME_PARAM)) mvnHome = commandLine.getOptionValue(MAVEN_HOME_PARAM);
+        if (commandLine.hasOption(JAVA_HOME_PARAM)) {
+            request.setJavaHome(new File(commandLine.getOptionValue(JAVA_HOME_PARAM)));
+        }
         request.setPomFile(new File(commandLine.getOptionValue(POM_PATH_PARAM)));
         return request;
     }
 
     @Override
-    public ByteArrayOutputStream runCommand(String[] args) {
-        return runMVNCommand(parseRequest(args));
+    public InputStream runCommand(String[] args) {
+        ByteArrayOutputStream out = (ByteArrayOutputStream) runMVNCommand(parseRequest(args));
+        return new ByteArrayInputStream(out.toByteArray());
     }
 
     @Override
-    public void analyze(ByteArrayOutputStream baos) {
-        System.out.println("Analyze output:");
-        System.out.println(baos.toString());
+    public void analyze(InputStream in) {
+        print(in);
     }
 }
