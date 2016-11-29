@@ -3,11 +3,17 @@ package com.ea.eadp.mvn.handler;
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
 import com.ea.eadp.mvn.model.exception.AnalyzeException;
 import com.ea.eadp.mvn.model.exception.ExceptionType;
+import com.ea.eadp.mvn.model.mvn.Dependency;
 import org.apache.commons.cli.*;
 import org.apache.maven.shared.invoker.*;
 
 import java.io.*;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * User: BichongLi
@@ -16,18 +22,19 @@ import java.util.Collections;
  */
 public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
 
-    protected static final String MODE_PARAM = "m";
-    protected static final String POM_PATH_PARAM = "p";
-    protected static final String HELP_PARAM = "h";
+    private static final String MODE_PARAM = "m";
+    private static final String POM_PATH_PARAM = "p";
+    private static final String HELP_PARAM = "h";
     protected static final String COMMAND_PARAM = "c";
-    protected static final String MAVEN_HOME_PARAM = "mh";
-    protected static final String JAVA_HOME_PARAM = "jh";
+    private static final String MAVEN_HOME_PARAM = "mh";
+    private static final String JAVA_HOME_PARAM = "jh";
     protected static final String MVN_COMMAND = "dependency:analyze";
 
-    private static final String LINE_SEPARATOR = "\n";
-    private static final String MAVEN_SEPARATE_LINE = "[INFO] ------------------------------------------------------------------------";
-    private static final String MODULE_BUILD_PREFIX = "[INFO] Building";
-    private static final String WARN_LEVEL_LOG_PREFIX = "[WARNING]";
+    protected static final Pattern MODULE_LINE_PATTERN = Pattern.compile("^\\[INFO\\] *Building (.*)$");
+    protected static final Pattern DEPENDENCY_LINE_PATTERN = Pattern.compile("^\\[.+\\] *(.*):(.*):(.*):(.*):(.*)$");
+
+    private static final String SEPARATE_LINE = " ------------------------------------------------------------------------ ";
+    protected static final String LINE_SEPARATOR = "\n";
 
     protected String mvnHome;
 
@@ -70,7 +77,7 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
         }
         InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(new File(commandLine.getOptionValue(POM_PATH_PARAM)));
-        request.setGoals(Collections.singletonList(MVN_COMMAND));
+        request.setGoals(getCommands(commandLine));
         if (commandLine.hasOption(MAVEN_HOME_PARAM)) mvnHome = commandLine.getOptionValue(MAVEN_HOME_PARAM);
         if (commandLine.hasOption(JAVA_HOME_PARAM)) {
             request.setJavaHome(new File(commandLine.getOptionValue(JAVA_HOME_PARAM)));
@@ -96,53 +103,48 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
         return out;
     }
 
+    abstract List<String> getCommands(CommandLine commandLine);
+
     public abstract void analyze(InputStream in);
 
-    protected String extractUsefulInfo(InputStream in) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        StringBuilder builder = new StringBuilder();
-        String line;
-        boolean isLastSeparateLine = false;
-        try {
-            while ((line = reader.readLine()) != null) {
-                if (line.equals(MAVEN_SEPARATE_LINE) && !isLastSeparateLine) {
-                    builder.append(line).append(LINE_SEPARATOR);
-                    isLastSeparateLine = true;
-                } else if (line.startsWith(MODULE_BUILD_PREFIX) || line.startsWith(WARN_LEVEL_LOG_PREFIX)) {
-                    builder.append(line).append(LINE_SEPARATOR);
-                    isLastSeparateLine = false;
-                }
-            }
-        } catch (IOException e) {
-            throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, "Error closing BufferedReader.", e);
-            }
-        }
-        return builder.toString();
+    protected void print(InputStream in) {
+        Map<String, List<Dependency>> dependencyMap = parseInputStream(in);
+        dependencyMap.forEach((k, v) -> {
+            System.out.println(SEPARATE_LINE);
+            System.out.println(k + LINE_SEPARATOR);
+            v.forEach(System.out::println);
+            System.out.println(SEPARATE_LINE);
+        });
     }
 
-    protected void print(InputStream in) {
+    private Map<String, List<Dependency>> parseInputStream(InputStream in) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        StringBuilder builder = new StringBuilder();
         String line;
+        Map<String, List<Dependency>> resultMap = new HashMap<>();
+        String currentModule = null;
+        List<Dependency> dependencies = new ArrayList<>();
         try {
             while ((line = reader.readLine()) != null) {
-                builder.append(line).append(LINE_SEPARATOR);
+                Matcher matcher = MODULE_LINE_PATTERN.matcher(line);
+                if (matcher.find()) {
+                    if (currentModule != null) resultMap.put(currentModule, dependencies);
+                    currentModule = matcher.group(1);
+                    dependencies = new ArrayList<>();
+                }
+                matcher = DEPENDENCY_LINE_PATTERN.matcher(line);
+                if (matcher.find()) {
+                    Dependency dependency = new Dependency(matcher.group(1), matcher.group(2),
+                            matcher.group(3), matcher.group(4), matcher.group(5));
+                    dependencies.add(dependency);
+                }
+            }
+            if (currentModule != null && !dependencies.isEmpty()) {
+                resultMap.put(currentModule, dependencies);
             }
         } catch (IOException e) {
             throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, "Error closing BufferedReader.", e);
-            }
         }
-        System.out.println(builder.toString());
+        return resultMap;
     }
 
 }

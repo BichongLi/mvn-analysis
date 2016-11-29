@@ -2,6 +2,7 @@ package com.ea.eadp.mvn;
 
 import com.ea.eadp.mvn.handler.AnalyzeHandler;
 import com.ea.eadp.mvn.handler.DependencyAnalyzeHandler;
+import com.ea.eadp.mvn.handler.DependencyListHandler;
 import com.ea.eadp.mvn.handler.MavenCommandHandler;
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
 
@@ -20,6 +21,7 @@ public class AnalyzeHandlerFactory {
     static {
         handlerMap.put(AnalyzeMode.ANALYZE_DEPENDENCY, DependencyAnalyzeHandler.getInstance());
         handlerMap.put(AnalyzeMode.RUN_COMMAND, MavenCommandHandler.getInstance());
+        handlerMap.put(AnalyzeMode.LIST_DEPENDENCY, DependencyListHandler.getInstance());
     }
 
     public static AnalyzeHandler getHandler(String mode) {

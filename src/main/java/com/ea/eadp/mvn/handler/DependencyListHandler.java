@@ -10,17 +10,17 @@ import java.util.List;
 
 /**
  * User: BichongLi
- * Date: 11/25/2016
- * Time: 8:56 AM
+ * Date: 11/29/2016
+ * Time: 11:36 AM
  */
-public class DependencyAnalyzeHandler extends BaseAnalyzeHandler {
+public class DependencyListHandler extends BaseAnalyzeHandler {
 
-    private static final DependencyAnalyzeHandler instance = new DependencyAnalyzeHandler();
+    private static final DependencyListHandler instance = new DependencyListHandler();
 
-    private DependencyAnalyzeHandler() {
+    private DependencyListHandler() {
     }
 
-    public static DependencyAnalyzeHandler getInstance() {
+    public static DependencyListHandler getInstance() {
         return instance;
     }
 
@@ -32,11 +32,11 @@ public class DependencyAnalyzeHandler extends BaseAnalyzeHandler {
 
     @Override
     List<String> getCommands(CommandLine commandLine) {
-        return Collections.singletonList(MVN_COMMAND);
+        return Collections.singletonList("dependency:list");
     }
 
     @Override
     public void analyze(InputStream in) {
-        print(in);
+
     }
 }
