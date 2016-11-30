@@ -10,13 +10,11 @@ import org.apache.commons.cli.*;
 import org.apache.maven.shared.invoker.*;
 
 import java.io.*;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 /**
  * User: BichongLi
@@ -103,12 +101,18 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
 
     abstract List<String> getCommands(CommandLine commandLine);
 
+    @Override
+    public InputStream runCommand(String[] args) {
+        ByteArrayOutputStream out = (ByteArrayOutputStream) runMVNCommand(parseRequest(args));
+        return new ByteArrayInputStream(out.toByteArray());
+    }
+
     public abstract void analyze(InputStream in);
 
     protected void print(Map<String, List<Dependency>> dependencyMap) {
         dependencyMap.forEach((k, v) -> {
             System.out.println(StringPatterns.SEPARATE_LINE);
-            System.out.println(k + LINE_SEPARATOR);
+            System.out.println( "[MODULE] "+ k + LINE_SEPARATOR);
             v.forEach(System.out::println);
             System.out.println(StringPatterns.SEPARATE_LINE);
         });
@@ -118,6 +122,16 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
         Matcher matcher = StringPatterns.DEPENDENCY_LINE_PATTERN.matcher(p);
         matcher.find();
         return new Dependency(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
+    };
+
+    protected Function<Pair<String, List<String>>, List<Pair<String, List<Dependency>>>> defaultMapStringsToDependencies = p -> {
+        List<Dependency> dependencies = p.getValue().stream()
+                .filter(q -> StringPatterns.DEPENDENCY_LINE_PATTERN.matcher(q).find())
+                .map(lineToDependency)
+                .collect(Collectors.toList());
+        List<Pair<String, List<Dependency>>> entries = new ArrayList<>();
+        entries.add(new Pair<>(p.getKey(), dependencies));
+        return entries;
     };
 
     protected Map<String, List<Dependency>> parseMVNCommandOutput(InputStream in, Predicate<String> startCollect, Predicate<String> endCollect,
@@ -151,6 +165,11 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
             }
         } catch (IOException e) {
             throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException ignored) {
+            }
         }
         return resultMap;
     }

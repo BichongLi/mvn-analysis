@@ -1,9 +1,6 @@
 package com.ea.eadp.mvn;
 
-import com.ea.eadp.mvn.handler.AnalyzeHandler;
-import com.ea.eadp.mvn.handler.DependencyAnalyzeHandler;
-import com.ea.eadp.mvn.handler.DependencyListHandler;
-import com.ea.eadp.mvn.handler.MavenCommandHandler;
+import com.ea.eadp.mvn.handler.*;
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
 
 import java.util.HashMap;
@@ -22,6 +19,7 @@ public class AnalyzeHandlerFactory {
         handlerMap.put(AnalyzeMode.ANALYZE_DEPENDENCY, DependencyAnalyzeHandler.getInstance());
         handlerMap.put(AnalyzeMode.RUN_COMMAND, MavenCommandHandler.getInstance());
         handlerMap.put(AnalyzeMode.LIST_DEPENDENCY, DependencyListHandler.getInstance());
+        handlerMap.put(AnalyzeMode.COMPARE_DEPENDENCY, DependencyCompareHandler.getInstance());
     }
 
     public static AnalyzeHandler getHandler(String mode) {

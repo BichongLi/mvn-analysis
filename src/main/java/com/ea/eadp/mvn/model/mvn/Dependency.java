@@ -1,11 +1,5 @@
 package com.ea.eadp.mvn.model.mvn;
 
-import com.ea.eadp.mvn.model.common.StringPatterns;
-import com.ea.eadp.mvn.model.exception.AnalyzeException;
-import com.ea.eadp.mvn.model.exception.ExceptionType;
-
-import java.util.regex.Matcher;
-
 /**
  * User: BichongLi
  * Date: 11/29/2016

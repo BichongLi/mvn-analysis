@@ -5,8 +5,6 @@ import com.ea.eadp.mvn.model.mvn.Dependency;
 import javafx.util.Pair;
 import org.apache.commons.cli.CommandLine;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -30,12 +28,6 @@ public class DependencyAnalyzeHandler extends BaseAnalyzeHandler {
 
     public static DependencyAnalyzeHandler getInstance() {
         return instance;
-    }
-
-    @Override
-    public InputStream runCommand(String[] args) {
-        ByteArrayOutputStream out = (ByteArrayOutputStream) runMVNCommand(parseRequest(args));
-        return new ByteArrayInputStream(out.toByteArray());
     }
 
     @Override
