@@ -1,12 +1,18 @@
 package com.ea.eadp.mvn.handler;
 
+import com.ea.eadp.mvn.model.common.StringPatterns;
+import com.ea.eadp.mvn.model.mvn.Dependency;
+import javafx.util.Pair;
 import org.apache.commons.cli.CommandLine;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * User: BichongLi
@@ -32,11 +38,21 @@ public class DependencyListHandler extends BaseAnalyzeHandler {
 
     @Override
     List<String> getCommands(CommandLine commandLine) {
-        return Collections.singletonList("dependency:list");
+        return Collections.singletonList(MVN_COMMAND);
     }
 
     @Override
     public void analyze(InputStream in) {
-
+        Function<Pair<String, List<String>>, List<Pair<String, List<Dependency>>>> mapStringsToDependencies = p -> {
+            List<Dependency> dependencies = p.getValue().stream()
+                    .filter(q -> StringPatterns.DEPENDENCY_LINE_PATTERN.matcher(q).find())
+                    .map(lineToDependency)
+                    .collect(Collectors.toList());
+            List<Pair<String, List<Dependency>>> entries = new ArrayList<>();
+            entries.add(new Pair<>(p.getKey(), dependencies));
+            return entries;
+        };
+        print(parseMVNCommandOutput(in, p -> p.equals(StringPatterns.START_DEPENDENCY_PRINT),
+                p -> p.equals(StringPatterns.MVN_OUTPUT_SEPARATE_LINE), mapStringsToDependencies));
     }
 }

@@ -1,19 +1,22 @@
 package com.ea.eadp.mvn.handler;
 
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
+import com.ea.eadp.mvn.model.common.StringPatterns;
 import com.ea.eadp.mvn.model.exception.AnalyzeException;
 import com.ea.eadp.mvn.model.exception.ExceptionType;
 import com.ea.eadp.mvn.model.mvn.Dependency;
+import javafx.util.Pair;
 import org.apache.commons.cli.*;
 import org.apache.maven.shared.invoker.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * User: BichongLi
@@ -28,12 +31,7 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
     protected static final String COMMAND_PARAM = "c";
     private static final String MAVEN_HOME_PARAM = "mh";
     private static final String JAVA_HOME_PARAM = "jh";
-    protected static final String MVN_COMMAND = "dependency:analyze";
-
-    protected static final Pattern MODULE_LINE_PATTERN = Pattern.compile("^\\[INFO\\] *Building (.*)$");
-    protected static final Pattern DEPENDENCY_LINE_PATTERN = Pattern.compile("^\\[.+\\] *(.*):(.*):(.*):(.*):(.*)$");
-
-    private static final String SEPARATE_LINE = " ------------------------------------------------------------------------ ";
+    protected static final String MVN_COMMAND = "dependency:list";
     protected static final String LINE_SEPARATOR = "\n";
 
     protected String mvnHome;
@@ -107,39 +105,49 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
 
     public abstract void analyze(InputStream in);
 
-    protected void print(InputStream in) {
-        Map<String, List<Dependency>> dependencyMap = parseInputStream(in);
+    protected void print(Map<String, List<Dependency>> dependencyMap) {
         dependencyMap.forEach((k, v) -> {
-            System.out.println(SEPARATE_LINE);
+            System.out.println(StringPatterns.SEPARATE_LINE);
             System.out.println(k + LINE_SEPARATOR);
             v.forEach(System.out::println);
-            System.out.println(SEPARATE_LINE);
+            System.out.println(StringPatterns.SEPARATE_LINE);
         });
     }
 
-    private Map<String, List<Dependency>> parseInputStream(InputStream in) {
+    protected Function<String, Dependency> lineToDependency = p -> {
+        Matcher matcher = StringPatterns.DEPENDENCY_LINE_PATTERN.matcher(p);
+        matcher.find();
+        return new Dependency(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
+    };
+
+    protected Map<String, List<Dependency>> parseMVNCommandOutput(InputStream in, Predicate<String> startCollect, Predicate<String> endCollect,
+                                                                  Function<Pair<String, List<String>>, List<Pair<String, List<Dependency>>>> mapStringsToDependencies) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         String line;
-        Map<String, List<Dependency>> resultMap = new HashMap<>();
+        boolean collecting = false;
+        Map<String, List<Dependency>> resultMap = new LinkedHashMap<>();
         String currentModule = null;
-        List<Dependency> dependencies = new ArrayList<>();
+        List<String> dependencyStrings = new LinkedList<>();
         try {
             while ((line = reader.readLine()) != null) {
-                Matcher matcher = MODULE_LINE_PATTERN.matcher(line);
-                if (matcher.find()) {
-                    if (currentModule != null) resultMap.put(currentModule, dependencies);
-                    currentModule = matcher.group(1);
-                    dependencies = new ArrayList<>();
+                if (collecting) {
+                    if (endCollect.test(line)) {
+                        collecting = false;
+                        List<Pair<String, List<Dependency>>> dependencies =
+                                mapStringsToDependencies.apply(new Pair<>(currentModule, dependencyStrings));
+                        dependencies.forEach(p -> resultMap.put(p.getKey(), p.getValue()));
+                    } else {
+                        dependencyStrings.add(line);
+                    }
+                } else if (startCollect.test(line)) {
+                    collecting = true;
+                    dependencyStrings = new LinkedList<>();
+                } else {
+                    Matcher matcher = StringPatterns.MODULE_LINE_PATTERN.matcher(line);
+                    if (matcher.find()) {
+                        currentModule = matcher.group(1);
+                    }
                 }
-                matcher = DEPENDENCY_LINE_PATTERN.matcher(line);
-                if (matcher.find()) {
-                    Dependency dependency = new Dependency(matcher.group(1), matcher.group(2),
-                            matcher.group(3), matcher.group(4), matcher.group(5));
-                    dependencies.add(dependency);
-                }
-            }
-            if (currentModule != null && !dependencies.isEmpty()) {
-                resultMap.put(currentModule, dependencies);
             }
         } catch (IOException e) {
             throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);

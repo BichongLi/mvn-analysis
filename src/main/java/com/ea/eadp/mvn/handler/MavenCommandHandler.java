@@ -41,6 +41,5 @@ public class MavenCommandHandler extends BaseAnalyzeHandler {
 
     @Override
     public void analyze(InputStream in) {
-        print(in);
     }
 }
