@@ -9,13 +9,6 @@ import java.util.regex.Pattern;
  */
 public class StringPatterns {
 
-    public static final Pattern MODULE_LINE_PATTERN = Pattern.compile("^\\[INFO\\] *Building (.*)$");
-    public static final Pattern DEPENDENCY_LINE_PATTERN =
-            Pattern.compile("^\\[\\w+\\] *(.+):(.+):(.+):(.+):(\\w+)$");
-    public static final String START_DEPENDENCY_PRINT = "[INFO] The following files have been resolved:";
-    public static final String MVN_OUTPUT_SEPARATE_LINE = "[INFO] ------------------------------------------------------------------------";
-    public static final String SEPARATE_LINE = " ------------------------------------------------------------------------ ";
-    public static final Pattern START_DEPENDENCY_ANALYZE =
-            Pattern.compile("^\\[INFO\\] --- maven-dependency-plugin:.*:analyze \\(default-cli\\) @ (.*) ---$");
+    public static final Pattern ANALYZE_REPORT_PATH_PATTERN = Pattern.compile("^\\[INFO\\] ([A-Z]:\\\\.+\\\\target)$");
 
 }
