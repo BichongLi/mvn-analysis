@@ -1,6 +1,7 @@
 package com.ea.eadp.mvn.handler;
 
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
+import com.ea.eadp.mvn.utils.IOUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -49,6 +50,6 @@ public class MavenCommandHandler extends BaseAnalyzeHandler {
         Options options = getOptions();
         CommandLine commandLine = parseCommandLine(args, options);
         checkHelp(commandLine, options, AnalyzeMode.RUN_COMMAND);
-        print(runMVNCommand(parseRequest(commandLine)));
+        IOUtils.print(runMVNCommand(parseRequest(commandLine)));
     }
 }

@@ -1,4 +1,4 @@
-package com.ea.eadp.mvn.model.mvn;
+package com.ea.eadp.mvn.model.dependency;
 
 /**
  * User: BichongLi
@@ -11,17 +11,17 @@ public class Dependency {
 
     private String artifactId;
 
-    private String packaging;
+    private String type;
 
     private String version;
 
     private String scope;
 
     public Dependency(String groupId, String artifactId,
-                      String packaging, String version, String scope) {
+                      String type, String version, String scope) {
         this.groupId = groupId;
         this.artifactId = artifactId;
-        this.packaging = packaging;
+        this.type = type;
         this.version = version;
         this.scope = scope;
     }
@@ -42,12 +42,12 @@ public class Dependency {
         this.artifactId = artifactId;
     }
 
-    public String getPackaging() {
-        return packaging;
+    public String getType() {
+        return type;
     }
 
-    public void setPackaging(String packaging) {
-        this.packaging = packaging;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getVersion() {
@@ -68,6 +68,7 @@ public class Dependency {
 
     @Override
     public String toString() {
-        return String.format("%1$s:%2$s:%3$s:%4$s:%5$s", groupId, artifactId, packaging, version, scope);
+        String dependency = String.format("%1$s:%2$s:%3$s:%4$s", groupId, artifactId, type, version);
+        return scope == null ? dependency : dependency + ":" + scope;
     }
 }

@@ -56,12 +56,16 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
         if (!commandLine.hasOption(POM_PATH_PARAM)) {
             throw new AnalyzeException(ExceptionType.INVALID_REQUEST, "Missing project pom.xml specified.");
         }
-        InvocationRequest request = new DefaultInvocationRequest();
-        request.setPomFile(new File(commandLine.getOptionValue(POM_PATH_PARAM)));
-        request.setGoals(getCommands(commandLine));
-        if (commandLine.hasOption(MAVEN_HOME_PARAM)) mvnHome = commandLine.getOptionValue(MAVEN_HOME_PARAM);
-        if (commandLine.hasOption(JAVA_HOME_PARAM)) {
-            request.setJavaHome(new File(commandLine.getOptionValue(JAVA_HOME_PARAM)));
+        InvocationRequest request = null;
+        List<String> goals = getCommands(commandLine);
+        if (goals != null && !goals.isEmpty()) {
+            request = new DefaultInvocationRequest();
+            request.setPomFile(new File(commandLine.getOptionValue(POM_PATH_PARAM)));
+            request.setGoals(getCommands(commandLine));
+            if (commandLine.hasOption(MAVEN_HOME_PARAM)) mvnHome = commandLine.getOptionValue(MAVEN_HOME_PARAM);
+            if (commandLine.hasOption(JAVA_HOME_PARAM)) {
+                request.setJavaHome(new File(commandLine.getOptionValue(JAVA_HOME_PARAM)));
+            }
         }
         return request;
     }
@@ -76,6 +80,9 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
     }
 
     protected InputStream runMVNCommand(InvocationRequest request) {
+        if (request == null) {
+            throw new AnalyzeException(ExceptionType.INVALID_REQUEST, "No mvn request to run.");
+        }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(out);
         Invoker invoker = new DefaultInvoker();
@@ -94,24 +101,7 @@ public abstract class BaseAnalyzeHandler implements AnalyzeHandler {
         return new ByteArrayInputStream(out.toByteArray());
     }
 
-    protected void print(InputStream in) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        String line;
-        try {
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException ignored) {
-            }
-        }
-    }
-
-    protected List<String> extractUsefulInfo(InputStream in, Predicate<String> isUseful) {
+    public List<String> extractUsefulInfo(InputStream in, Predicate<String> isUseful) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         List<String> usefulLines = new LinkedList<>();
         String line;

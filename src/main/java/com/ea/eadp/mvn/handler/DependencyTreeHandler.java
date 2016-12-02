@@ -32,7 +32,7 @@ public class DependencyTreeHandler extends BaseAnalyzeHandler {
     protected Options getOptions() {
         Options options = super.getOptions();
         Option outputFile = Option.builder(OUTPUT_FILE_PARAM).longOpt("Output dot file")
-                .hasArg().required(true).build();
+                .hasArg().build();
         options.addOption(outputFile);
         return options;
     }
@@ -48,7 +48,7 @@ public class DependencyTreeHandler extends BaseAnalyzeHandler {
     public void analyze(String[] args) {
         Options options = getOptions();
         CommandLine commandLine = parseCommandLine(args, options);
-        checkHelp(commandLine, options, AnalyzeMode.ANALYZE_DEPENDENCY);
+        checkHelp(commandLine, options, AnalyzeMode.ANALYZE_DEPENDENCY_TREE);
         runMVNCommand(parseRequest(commandLine));
     }
 }

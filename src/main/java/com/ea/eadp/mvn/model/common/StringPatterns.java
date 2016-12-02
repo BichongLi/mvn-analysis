@@ -10,5 +10,7 @@ import java.util.regex.Pattern;
 public class StringPatterns {
 
     public static final Pattern ANALYZE_REPORT_PATH_PATTERN = Pattern.compile("^\\[INFO\\] ([A-Z]:\\\\.+\\\\target)$");
+    public static final Pattern DEPENDENCY_TREE_EDGE_PATTERN = Pattern.compile("^.*\"(.+)\" -> \"(.+)\".*$");
+    public static final Pattern DEPENDENCY_STRING_PATTERN = Pattern.compile("^([^:]+):([^:]+):([^:]+[:?:shaded|sources]*):([^:]+):*([^:]+)*$");
 
 }
