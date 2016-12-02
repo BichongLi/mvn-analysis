@@ -64,10 +64,7 @@ public class DependencyAnalyzeHandler extends BaseAnalyzeHandler {
                     return matcher.group(1) + "\\" + ANALYZE_REPORT_FILENAME;
                 }).collect(Collectors.toList());
         if (commandLine.hasOption(OUTPUT_FOLDER_PARAM)) {
-            String folder = commandLine.getOptionValue(OUTPUT_FOLDER_PARAM);
-            String targetFolder;
-            if (!folder.endsWith("\\")) targetFolder = folder + "\\";
-            else targetFolder = folder;
+            String targetFolder = normalizeDirectoryPath(commandLine.getOptionValue(OUTPUT_FOLDER_PARAM));
             createFolderIfNotExists(targetFolder);
             reports.forEach(p -> {
                 Matcher matcher = ANALYZE_REPORT_PATH_PATTERN.matcher(p);
@@ -89,6 +86,12 @@ public class DependencyAnalyzeHandler extends BaseAnalyzeHandler {
             System.out.println(String.format("Reports have been copied to %1$s", targetFolder));
         }
         System.out.print("Successfully done.");
+    }
+
+    private String normalizeDirectoryPath(String path) {
+        String directoryPath = path.replace("\"", "").trim();
+        if (!directoryPath.endsWith("\\")) directoryPath += "\\";
+        return directoryPath;
     }
 
     private void createFolderIfNotExists(String folder) {
