@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  */
 public class DependencyAnalyzeHandler extends BaseAnalyzeHandler {
 
-    private static final String OUTPUT_FOLDER_PARAM = "t";
+    private static final String OUTPUT_FOLDER_PARAM = "o";
     private static final String ANALYZE_REPORT_FILENAME = "dependency-analysis.html";
     private static final Pattern ANALYZE_REPORT_PATH_PATTERN = Pattern.compile("^[A-Z]:\\\\.+\\\\(.+)\\\\target\\\\dependency-analysis.html$");
 

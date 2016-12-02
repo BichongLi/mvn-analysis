@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public enum AnalyzeMode {
 
     ANALYZE_DEPENDENCY("dependencyAnalyze"),
+    ANALYZE_DEPENDENCY_TREE("dependencyTree"),
     RUN_COMMAND("commandRun");
 
     private String name;
