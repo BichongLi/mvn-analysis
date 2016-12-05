@@ -1,5 +1,7 @@
 package com.ea.eadp.mvn.model.dependency;
 
+import com.ea.eadp.mvn.model.common.DependencyDiff;
+
 /**
  * User: BichongLi
  * Date: 11/29/2016
@@ -70,5 +72,18 @@ public class Dependency {
     public String toString() {
         String dependency = String.format("%1$s:%2$s:%3$s:%4$s", groupId, artifactId, type, version);
         return scope == null ? dependency : dependency + ":" + scope;
+    }
+    
+    public DependencyDiff compare(Dependency dependency) {
+        if (this.getGroupId().equals(dependency.getGroupId()) &&
+                this.getArtifactId().equals(dependency.getArtifactId()) &&
+                this.getVersion().equals(dependency.getVersion())) {
+            return DependencyDiff.SAME;
+        } else if (this.getGroupId().equals(dependency.getGroupId()) &&
+                this.getArtifactId().equals(dependency.getArtifactId()) &&
+                !this.getVersion().equals(dependency.getVersion())) return DependencyDiff.DIFFERENT_VERSION;
+        else if (this.getArtifactId().equals(dependency.getArtifactId()) &&
+                !this.getGroupId().equals(dependency.getGroupId())) return DependencyDiff.SIMILAR;
+        else return DependencyDiff.DIFFERENT_DEPENDENCY;
     }
 }
