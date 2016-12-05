@@ -6,13 +6,20 @@ import com.ea.eadp.mvn.model.common.StringPatterns;
 import com.ea.eadp.mvn.model.dependency.Dependency;
 import com.ea.eadp.mvn.model.dependency.Diff;
 import com.ea.eadp.mvn.model.dependency.TreeNode;
+import com.ea.eadp.mvn.model.exception.AnalyzeException;
+import com.ea.eadp.mvn.model.exception.ExceptionType;
 import com.ea.eadp.mvn.utils.DependencyTreeUtils;
 import com.ea.eadp.mvn.utils.IOUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +32,7 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
 
     private static final String LEFT_TREE_PARAM = "l";
     private static final String RIGHT_TREE_PARAM = "r";
+    private static final String OUTPUT_FILE_PARAM = "o";
 
     private static final Set<String> IGNORE_CMP_VERSION_GROUP_ID = new HashSet<>();
 
@@ -49,8 +57,11 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
                 .hasArg().build();
         Option right = Option.builder(RIGHT_TREE_PARAM).longOpt("Right dot file to compare.")
                 .hasArg().build();
+        Option outputFile = Option.builder(OUTPUT_FILE_PARAM).longOpt("Output txt file")
+                .hasArg().build();
         options.addOption(left);
         options.addOption(right);
+        options.addOption(outputFile);
         return options;
     }
 
@@ -75,7 +86,12 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
         }
 
         List<Diff> diffResult = compareEachLevel(leftRoot, rightRoot);
-        printDiffResults(diffResult);
+
+        if (commandLine.hasOption(OUTPUT_FILE_PARAM)) {
+            printDiffResultsToFile(diffResult, commandLine.getOptionValue(OUTPUT_FILE_PARAM));
+        } else {
+            printDiffResultsToConsole(diffResult);
+        }
     }
 
     private TreeNode buildDependencyTree(String filePath) {
@@ -146,12 +162,40 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
         return result;
     }
 
-    private void printDiffResults(List<Diff> results) {
+    private void printDiffResultsToFile(List<Diff> results, String outputFile) {
         List<Diff> different = new ArrayList<>();
         List<Diff> leftOnly = new ArrayList<>();
         List<Diff> rightOnly = new ArrayList<>();
+        categorizeDiffResults(results, different, leftOnly, rightOnly);
+
+        List<String> lines = new LinkedList<>();
+        lines.add("Find matched different dependencies:");
+        different.forEach(d -> lines.add(d.toString()));
+        leftOnly.forEach(d -> lines.add(d.toString()));
+        rightOnly.forEach(d -> lines.add(d.toString()));
+        Path file = Paths.get(outputFile);
+        try {
+            Files.write(file, lines, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, "Error writing diff results into file %1$s", outputFile);
+        }
+    }
+
+    private void printDiffResultsToConsole(List<Diff> results) {
+        List<Diff> different = new ArrayList<>();
+        List<Diff> leftOnly = new ArrayList<>();
+        List<Diff> rightOnly = new ArrayList<>();
+        categorizeDiffResults(results, different, leftOnly, rightOnly);
+
         System.out.println("Find matched different dependencies:");
-        results.forEach(r -> {
+        different.forEach(System.out::println);
+        leftOnly.forEach(System.out::println);
+        rightOnly.forEach(System.out::println);
+    }
+
+    private void categorizeDiffResults(List<Diff> total, List<Diff> different,
+                                       List<Diff> leftOnly, List<Diff> rightOnly) {
+        total.forEach(r -> {
             if (r.getDiffType() == null) {
                 if (r.getLeftDependency() == null) rightOnly.add(r);
                 if (r.getRightDependency() == null) leftOnly.add(r);
@@ -163,10 +207,5 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
             if (d1.getDiffType() != d2.getDiffType()) return d1.getDiffType().compareTo(d2.getDiffType());
             return d1.getLeftDependency().compareTo(d2.getLeftDependency());
         });
-        /*leftOnly.sort((Diff d1, Diff d2) -> d1.getLeftDependency().compareTo(d2.getLeftDependency()));
-        rightOnly.sort((Diff d1, Diff d2) -> d1.getRightDependency().compareTo(d2.getRightDependency()));*/
-        different.forEach(System.out::println);
-        leftOnly.forEach(System.out::println);
-        rightOnly.forEach(System.out::println);
     }
 }
