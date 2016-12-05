@@ -24,7 +24,8 @@ public class DependencyTreeUtils {
             if (matcher.find()) {
                 TreeNode parent = getOrCreateNode(matcher.group(1), dictionary);
                 TreeNode child = getOrCreateNode(matcher.group(2), dictionary);
-                parent.getDependencies().add(child);
+                parent.getChildren().add(child);
+                child.setParent(parent);
                 int indegree = indegreeMap.containsKey(child) ? indegreeMap.get(child) + 1 : 1;
                 indegreeMap.put(child, indegree);
                 if (!indegreeMap.containsKey(parent)) indegreeMap.put(parent, 0);

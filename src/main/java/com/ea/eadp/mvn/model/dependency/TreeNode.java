@@ -12,7 +12,9 @@ public class TreeNode {
 
     private Dependency dependency;
 
-    private Set<TreeNode> dependencies = new HashSet<>();
+    private TreeNode parent;
+
+    private Set<TreeNode> children = new HashSet<>();
 
     public TreeNode(Dependency dependency) {
         this.dependency = dependency;
@@ -26,11 +28,19 @@ public class TreeNode {
         this.dependency = dependency;
     }
 
-    public Set<TreeNode> getDependencies() {
-        return dependencies;
+    public TreeNode getParent() {
+        return parent;
     }
 
-    public void setDependencies(Set<TreeNode> dependencies) {
-        this.dependencies = dependencies;
+    public void setParent(TreeNode parent) {
+        this.parent = parent;
+    }
+
+    public Set<TreeNode> getChildren() {
+        return children;
+    }
+
+    public void setChildren(Set<TreeNode> children) {
+        this.children = children;
     }
 }

@@ -41,7 +41,7 @@ public class DependencyTreeTest {
 
     private void collect(TreeNode node, Set<String> dependencies) {
         dependencies.add(node.getDependency().toString());
-        node.getDependencies().forEach(p -> collect(p, dependencies));
+        node.getChildren().forEach(p -> collect(p, dependencies));
     }
 
 }

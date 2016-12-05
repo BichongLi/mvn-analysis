@@ -118,12 +118,12 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
                     break;
                 }
                 if (!match) {
-                    result.add(new Diff(null, ld.toString(), null));
+                    result.add(new Diff(null, getTreePath(lt), null));
                 }
             });
             if (!right.isEmpty()) {
                 result.addAll(
-                        right.stream().map(d -> new Diff(null, null, d.toString()))
+                        right.stream().map(n -> new Diff(null, null, getTreePath(n)))
                                 .collect(Collectors.toList()));
             }
         }
@@ -132,11 +132,22 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
 
     private Set<TreeNode> getNextLevelNodes(Set<TreeNode> nodes) {
         Set<TreeNode> nextLevelNodes = new HashSet<>();
-        nodes.forEach(node -> nextLevelNodes.addAll(node.getDependencies()));
+        nodes.forEach(node -> nextLevelNodes.addAll(node.getChildren()));
         return nextLevelNodes;
     }
 
+    private String getTreePath(TreeNode node) {
+        TreeNode tmp = node;
+        String result = tmp.getDependency().toString();
+        while (tmp.getParent() != null) {
+            tmp = tmp.getParent();
+            result = tmp.getDependency().toString() + " -> " + result;
+        }
+        return result;
+    }
+
     private void printDiffResults(List<Diff> results) {
+        List<Diff> different = new ArrayList<>();
         List<Diff> leftOnly = new ArrayList<>();
         List<Diff> rightOnly = new ArrayList<>();
         System.out.println("Find matched different dependencies:");
@@ -145,9 +156,16 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
                 if (r.getLeftDependency() == null) rightOnly.add(r);
                 if (r.getRightDependency() == null) leftOnly.add(r);
             } else {
-                System.out.println(r.toString());
+                different.add(r);
             }
         });
+        different.sort((Diff d1, Diff d2) -> {
+            if (d1.getDiffType() != d2.getDiffType()) return d1.getDiffType().compareTo(d2.getDiffType());
+            return d1.getLeftDependency().compareTo(d2.getLeftDependency());
+        });
+        /*leftOnly.sort((Diff d1, Diff d2) -> d1.getLeftDependency().compareTo(d2.getLeftDependency()));
+        rightOnly.sort((Diff d1, Diff d2) -> d1.getRightDependency().compareTo(d2.getRightDependency()));*/
+        different.forEach(System.out::println);
         leftOnly.forEach(System.out::println);
         rightOnly.forEach(System.out::println);
     }
