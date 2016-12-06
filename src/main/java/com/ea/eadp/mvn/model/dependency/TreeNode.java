@@ -1,5 +1,8 @@
 package com.ea.eadp.mvn.model.dependency;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,10 +11,12 @@ import java.util.Set;
  * Date: 12/2/2016
  * Time: 10:08 AM
  */
+@XStreamAlias("node")
 public class TreeNode {
 
     private Dependency dependency;
 
+    @XStreamOmitField
     private TreeNode parent;
 
     private Set<TreeNode> children = new HashSet<>();

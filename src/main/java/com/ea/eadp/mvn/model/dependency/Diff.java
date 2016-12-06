@@ -1,12 +1,14 @@
 package com.ea.eadp.mvn.model.dependency;
 
 import com.ea.eadp.mvn.model.common.DependencyDiff;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
  * User: BichongLi
  * Date: 12/4/2016
  * Time: 6:25 PM
  */
+@XStreamAlias("diff")
 public class Diff {
 
     private DependencyDiff diffType;
@@ -15,10 +17,14 @@ public class Diff {
 
     private String rightDependency;
 
-    public Diff(DependencyDiff diffType, String leftDependency, String rightDependency) {
+    private String reference;
+
+    public Diff(DependencyDiff diffType, String leftDependency,
+                String rightDependency, String reference) {
         this.diffType = diffType;
         this.leftDependency = leftDependency;
         this.rightDependency = rightDependency;
+        this.reference = reference;
     }
 
     public DependencyDiff getDiffType() {

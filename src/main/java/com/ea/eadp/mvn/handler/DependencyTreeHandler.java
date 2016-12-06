@@ -1,10 +1,15 @@
 package com.ea.eadp.mvn.handler;
 
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
+import com.ea.eadp.mvn.model.common.StringPatterns;
+import com.ea.eadp.mvn.model.dependency.TreeNode;
+import com.ea.eadp.mvn.utils.DependencyTreeUtils;
+import com.ea.eadp.mvn.utils.IOUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +36,7 @@ public class DependencyTreeHandler extends BaseAnalyzeHandler {
     @Override
     protected Options getOptions() {
         Options options = super.getOptions();
-        Option outputFile = Option.builder(OUTPUT_FILE_PARAM).longOpt("Output dot file")
+        Option outputFile = Option.builder(OUTPUT_FILE_PARAM).longOpt("Output tree structure file")
                 .hasArg().build();
         options.addOption(outputFile);
         return options;
@@ -50,5 +55,16 @@ public class DependencyTreeHandler extends BaseAnalyzeHandler {
         CommandLine commandLine = parseCommandLine(args, options);
         checkHelp(commandLine, options, AnalyzeMode.ANALYZE_DEPENDENCY_TREE);
         runMVNCommand(parseRequest(commandLine));
+
+        String outputFile = commandLine.getOptionValue(OUTPUT_FILE_PARAM);
+        TreeNode treeRoot = buildDependencyTree(outputFile);
+        IOUtils.printXMLtoFile(treeRoot, outputFile);
+    }
+
+    private TreeNode buildDependencyTree(String filePath) {
+        InputStream file = IOUtils.readFileToInputStream(filePath);
+        List<String> edges = extractUsefulInfo(file,
+                p -> StringPatterns.DEPENDENCY_TREE_EDGE_PATTERN.matcher(p).find());
+        return DependencyTreeUtils.generateDependencyTree(edges);
     }
 }

@@ -1,12 +1,14 @@
 package com.ea.eadp.mvn.model.dependency;
 
 import com.ea.eadp.mvn.model.common.DependencyDiff;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
  * User: BichongLi
  * Date: 11/29/2016
  * Time: 11:17 AM
  */
+@XStreamAlias("dependency")
 public class Dependency {
 
     private String groupId;
