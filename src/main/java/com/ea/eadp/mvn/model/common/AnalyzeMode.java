@@ -16,6 +16,7 @@ public enum AnalyzeMode {
 
     ANALYZE_DEPENDENCY("dependencyAnalyze"),
     ANALYZE_DEPENDENCY_TREE("dependencyTree"),
+    ANALYZE_DEPENDENCY_LIST("dependencyList"),
     DEPENDENCY_TREE_COMPARE("treeCompare"),
     RUN_COMMAND("commandRun");
 

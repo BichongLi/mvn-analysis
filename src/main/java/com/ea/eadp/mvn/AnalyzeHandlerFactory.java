@@ -20,6 +20,7 @@ public class AnalyzeHandlerFactory {
         handlerMap.put(AnalyzeMode.RUN_COMMAND, MavenCommandHandler.getInstance());
         handlerMap.put(AnalyzeMode.ANALYZE_DEPENDENCY_TREE, DependencyTreeHandler.getInstance());
         handlerMap.put(AnalyzeMode.DEPENDENCY_TREE_COMPARE, TreeCompareHandler.getInstance());
+        handlerMap.put(AnalyzeMode.ANALYZE_DEPENDENCY_LIST, DependencyListHandler.getInstance());
     }
 
     public static AnalyzeHandler getHandler(String mode) {

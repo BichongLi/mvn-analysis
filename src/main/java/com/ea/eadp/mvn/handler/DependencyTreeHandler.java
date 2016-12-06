@@ -3,7 +3,7 @@ package com.ea.eadp.mvn.handler;
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
 import com.ea.eadp.mvn.model.common.StringPatterns;
 import com.ea.eadp.mvn.model.dependency.TreeNode;
-import com.ea.eadp.mvn.utils.DependencyTreeUtils;
+import com.ea.eadp.mvn.utils.DependencyUtils;
 import com.ea.eadp.mvn.utils.IOUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -65,6 +65,6 @@ public class DependencyTreeHandler extends BaseAnalyzeHandler {
         InputStream file = IOUtils.readFileToInputStream(filePath);
         List<String> edges = extractUsefulInfo(file,
                 p -> StringPatterns.DEPENDENCY_TREE_EDGE_PATTERN.matcher(p).find());
-        return DependencyTreeUtils.generateDependencyTree(edges);
+        return DependencyUtils.generateDependencyTree(edges);
     }
 }

@@ -3,7 +3,7 @@ package com.ea.eadp.mvn;
 import com.ea.eadp.mvn.handler.DependencyTreeHandler;
 import com.ea.eadp.mvn.model.common.StringPatterns;
 import com.ea.eadp.mvn.model.dependency.TreeNode;
-import com.ea.eadp.mvn.utils.DependencyTreeUtils;
+import com.ea.eadp.mvn.utils.DependencyUtils;
 import com.ea.eadp.mvn.utils.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class DependencyTreeTest {
     public void test() {
         ClassLoader classLoader = getClass().getClassLoader();
         DependencyTreeHandler handler = DependencyTreeHandler.getInstance();
-        TreeNode root = DependencyTreeUtils.generateDependencyTree(
+        TreeNode root = DependencyUtils.generateDependencyTree(
                 handler.extractUsefulInfo(IOUtils.readFileToInputStream(classLoader.getResource(TREE_FILE).getFile()),
                         p -> StringPatterns.DEPENDENCY_TREE_EDGE_PATTERN.matcher(p).find())
         );

@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
  * Date: 12/2/2016
  * Time: 10:07 AM
  */
-public class DependencyTreeUtils {
+public class DependencyUtils {
 
     public static TreeNode generateDependencyTree(List<String> edges) {
         Map<String, TreeNode> dictionary = new HashMap<>();
@@ -47,7 +47,7 @@ public class DependencyTreeUtils {
         return node;
     }
 
-    private static Dependency generateDependency(String dependencyString) {
+    public static Dependency generateDependency(String dependencyString) {
         Matcher matcher = StringPatterns.DEPENDENCY_STRING_PATTERN.matcher(dependencyString);
         if (matcher.find()) {
             String groupId = matcher.group(1);

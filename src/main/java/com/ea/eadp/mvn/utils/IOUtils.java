@@ -1,12 +1,10 @@
 package com.ea.eadp.mvn.utils;
 
-import com.ea.eadp.mvn.model.dependency.Dependency;
-import com.ea.eadp.mvn.model.dependency.Diff;
-import com.ea.eadp.mvn.model.dependency.DiffResult;
-import com.ea.eadp.mvn.model.dependency.TreeNode;
+import com.ea.eadp.mvn.model.dependency.*;
 import com.ea.eadp.mvn.model.exception.AnalyzeException;
 import com.ea.eadp.mvn.model.exception.ExceptionType;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -18,11 +16,11 @@ import java.io.*;
  */
 public class IOUtils {
 
-    private static final XStream xstream = new XStream();
+    private static final XStream xstream = new XStream(new DomDriver("UTF-8"));
 
     static {
         xstream.processAnnotations(new Class[] {
-            TreeNode.class, Dependency.class, DiffResult.class, Diff.class
+            TreeNode.class, Dependency.class, DiffResult.class, Diff.class, DependencyWrapper.class
         });
     }
 
