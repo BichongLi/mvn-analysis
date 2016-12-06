@@ -1,15 +1,21 @@
 package com.ea.eadp.mvn.handler;
 
+import com.ea.eadp.mvn.model.common.AnalyzeMode;
 import com.ea.eadp.mvn.model.common.StringPatterns;
-import com.ea.eadp.mvn.model.mvn.Dependency;
-import javafx.util.Pair;
+import com.ea.eadp.mvn.model.exception.AnalyzeException;
+import com.ea.eadp.mvn.model.exception.ExceptionType;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.io.FileUtils;
 
-import java.io.InputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * User: BichongLi
@@ -18,8 +24,9 @@ import java.util.function.Function;
  */
 public class DependencyAnalyzeHandler extends BaseAnalyzeHandler {
 
-    private static final String UNDECLARED_DEPENDENCY_FOUND = "[WARNING] Used undeclared dependencies found:";
-    private static final String UNUSED_DEPENDENCY_FOUND = "[WARNING] Unused declared dependencies found:";
+    private static final String OUTPUT_FOLDER_PARAM = "o";
+    private static final String ANALYZE_REPORT_FILENAME = "dependency-analysis.html";
+    private static final Pattern ANALYZE_REPORT_PATH_PATTERN = Pattern.compile("^[A-Z]:\\\\.+\\\\(.+)\\\\target\\\\dependency-analysis.html$");
 
     private static final DependencyAnalyzeHandler instance = new DependencyAnalyzeHandler();
 
@@ -31,40 +38,68 @@ public class DependencyAnalyzeHandler extends BaseAnalyzeHandler {
     }
 
     @Override
-    List<String> getCommands(CommandLine commandLine) {
-        return Collections.singletonList("dependency:analyze");
+    protected Options getOptions() {
+        Options options = super.getOptions();
+        Option targetFolder = Option.builder(OUTPUT_FOLDER_PARAM).longOpt("Output target folder")
+                .hasArg().required(false).build();
+        options.addOption(targetFolder);
+        return options;
     }
 
     @Override
-    public void analyze(InputStream in) {
-        Function<Pair<String, List<String>>, List<Pair<String, List<Dependency>>>> mapStringsToDependencies = p -> {
-            String currentModule = p.getKey();
-            String situation = null;
-            List<Dependency> dependencies = new LinkedList<>();
-            List<Pair<String, List<Dependency>>> results = new LinkedList<>();
-            for (String line : p.getValue()) {
-                switch (line) {
-                    case UNDECLARED_DEPENDENCY_FOUND:
-                        situation = "Undeclared dependencies in " + currentModule;
-                        break;
-                    case UNUSED_DEPENDENCY_FOUND:
-                        if (situation != null && !dependencies.isEmpty()) {
-                            results.add(new Pair<>(situation, dependencies));
-                            dependencies = new LinkedList<>();
-                        }
-                        situation = "Unused dependencies in " + currentModule;
-                        break;
-                    default:
-                        if (StringPatterns.DEPENDENCY_LINE_PATTERN.matcher(line).find()) {
-                            dependencies.add(lineToDependency.apply(line));
-                        }
-                        break;
+    List<String> getCommands(CommandLine commandLine) {
+        return Collections.singletonList("dependency:analyze-report");
+    }
+
+    @Override
+    public void analyze(String[] args) {
+        Options options = getOptions();
+        CommandLine commandLine = parseCommandLine(args, options);
+        checkHelp(commandLine, options, AnalyzeMode.ANALYZE_DEPENDENCY);
+        List<String> reports = extractUsefulInfo(runMVNCommand(parseRequest(commandLine)),
+                p -> StringPatterns.ANALYZE_REPORT_PATH_PATTERN.matcher(p).find())
+                .stream().map(p -> {
+                    Matcher matcher = StringPatterns.ANALYZE_REPORT_PATH_PATTERN.matcher(p);
+                    matcher.find();
+                    return matcher.group(1) + "\\" + ANALYZE_REPORT_FILENAME;
+                }).collect(Collectors.toList());
+        if (commandLine.hasOption(OUTPUT_FOLDER_PARAM)) {
+            String targetFolder = normalizeDirectoryPath(commandLine.getOptionValue(OUTPUT_FOLDER_PARAM));
+            createFolderIfNotExists(targetFolder);
+            reports.forEach(p -> {
+                Matcher matcher = ANALYZE_REPORT_PATH_PATTERN.matcher(p);
+                String module;
+                if (matcher.find()) {
+                    module = matcher.group(1);
+                } else {
+                    throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, "Error parsing report file path %1$s", p);
                 }
+                File source = new File(p);
+                File dest = new File(String.format("%1$s%2$s-dependency-analysis.html", targetFolder, module));
+                try {
+                    FileUtils.copyFile(source, dest);
+                } catch (IOException e) {
+                    throw new AnalyzeException(ExceptionType.INTERNAL_ERROR,
+                            "Error copying %1$s to %2$s", source.getAbsolutePath(), dest.getAbsolutePath());
+                }
+            });
+            System.out.println(String.format("Reports have been copied to %1$s", targetFolder));
+        }
+        System.out.print("Successfully done.");
+    }
+
+    private String normalizeDirectoryPath(String path) {
+        String directoryPath = path.replace("\"", "").trim();
+        if (!directoryPath.endsWith("\\")) directoryPath += "\\";
+        return directoryPath;
+    }
+
+    private void createFolderIfNotExists(String folder) {
+        File dir = new File(folder);
+        if (!dir.isDirectory() || !dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new AnalyzeException(ExceptionType.INVALID_REQUEST, "Error creating folder %1$s", folder);
             }
-            if (situation != null && !dependencies.isEmpty()) results.add(new Pair<>(situation, dependencies));
-            return results;
-        };
-        print(parseMVNCommandOutput(in, p -> StringPatterns.START_DEPENDENCY_ANALYZE.matcher(p).find(),
-                p -> p.equals(StringPatterns.MVN_OUTPUT_SEPARATE_LINE), mapStringsToDependencies));
+        }
     }
 }

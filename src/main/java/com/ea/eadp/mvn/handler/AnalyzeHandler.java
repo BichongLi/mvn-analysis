@@ -1,7 +1,5 @@
 package com.ea.eadp.mvn.handler;
 
-import java.io.InputStream;
-
 /**
  * User: BichongLi
  * Date: 11/25/2016
@@ -9,8 +7,6 @@ import java.io.InputStream;
  */
 public interface AnalyzeHandler {
 
-    InputStream runCommand(String[] args);
-
-    void analyze(InputStream in);
+    void analyze(String[] args);
 
 }
