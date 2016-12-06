@@ -1,7 +1,10 @@
 package com.ea.eadp.mvn.model.dependency;
 
 import com.ea.eadp.mvn.model.common.DependencyDiff;
+import com.ea.eadp.mvn.model.common.StringPatterns;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+
+import java.util.Date;
 
 /**
  * User: BichongLi
@@ -21,6 +24,12 @@ public class Dependency {
 
     private String scope;
 
+    private String reference;
+
+    private String latestVersion;
+
+    private Date releaseTime;
+
     public Dependency(String groupId, String artifactId,
                       String type, String version, String scope) {
         this.groupId = groupId;
@@ -28,6 +37,7 @@ public class Dependency {
         this.type = type;
         this.version = version;
         this.scope = scope;
+        this.reference = String.format(StringPatterns.MVN_REPOSITORY_REFERENCE, this.groupId, this.artifactId);
     }
 
     public String getGroupId() {
@@ -68,6 +78,30 @@ public class Dependency {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public String getLatestVersion() {
+        return latestVersion;
+    }
+
+    public void setLatestVersion(String latestVersion) {
+        this.latestVersion = latestVersion;
+    }
+
+    public Date getReleaseTime() {
+        return releaseTime;
+    }
+
+    public void setReleaseTime(Date releaseTime) {
+        this.releaseTime = releaseTime;
     }
 
     @Override

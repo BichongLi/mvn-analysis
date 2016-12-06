@@ -12,7 +12,9 @@ import org.apache.commons.cli.Options;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -23,6 +25,13 @@ import java.util.stream.Collectors;
 public class DependencyListHandler extends BaseAnalyzeHandler {
 
     private static final String OUTPUT_FILE_PARAM = "o";
+
+    private static final Set<String> IGNORE_LIST_GROUP_ID = new HashSet<>();
+
+    static {
+        IGNORE_LIST_GROUP_ID.add("com.ea.eadp");
+        IGNORE_LIST_GROUP_ID.add("com.ea.nucleus");
+    }
 
     private static final String MVN_COMMAND_FORMAT = "dependency:list -DoutputFile=%1$s";
 
@@ -57,6 +66,7 @@ public class DependencyListHandler extends BaseAnalyzeHandler {
                 p -> StringPatterns.DEPENDENCY_STRING_PATTERN.matcher(p.trim()).find());
         List<Dependency> dependencies = dependencyLines.stream()
                 .map(line -> DependencyUtils.generateDependency(line.trim()))
+                .filter(d -> !IGNORE_LIST_GROUP_ID.contains(d.getGroupId()))
                 .collect(Collectors.toList());
         DependencyWrapper wrapper = new DependencyWrapper(dependencies);
         IOUtils.printXMLtoFile(wrapper, output);

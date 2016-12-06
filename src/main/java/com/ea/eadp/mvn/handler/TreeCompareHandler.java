@@ -2,6 +2,7 @@ package com.ea.eadp.mvn.handler;
 
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
 import com.ea.eadp.mvn.model.common.DependencyDiff;
+import com.ea.eadp.mvn.model.common.StringPatterns;
 import com.ea.eadp.mvn.model.dependency.Dependency;
 import com.ea.eadp.mvn.model.dependency.Diff;
 import com.ea.eadp.mvn.model.dependency.DiffResult;
@@ -24,8 +25,6 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
     private static final String LEFT_TREE_PARAM = "l";
     private static final String RIGHT_TREE_PARAM = "r";
     private static final String OUTPUT_FILE_PARAM = "o";
-
-    private static final String MVN_REPOSITORY_REFERENCE = "https://mvnrepository.com/artifact/%1$s/%2$s";
 
     private static final Set<String> IGNORE_CMP_VERSION_GROUP_ID = new HashSet<>();
 
@@ -116,7 +115,7 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
                     } else {
                         result.add(new Diff(
                                 diff, ld.toString(), rd.toString(),
-                                String.format(MVN_REPOSITORY_REFERENCE, ld.getGroupId(), ld.getArtifactId())
+                                String.format(StringPatterns.MVN_REPOSITORY_REFERENCE, ld.getGroupId(), ld.getArtifactId())
                         ));
                     }
                     iterator.remove();
@@ -125,13 +124,13 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
                 if (!match) {
                     result.add(new Diff(
                             null, getTreePath(lt), null,
-                            String.format(MVN_REPOSITORY_REFERENCE, lt.getDependency().getGroupId(), lt.getDependency().getArtifactId()))
+                            String.format(StringPatterns.MVN_REPOSITORY_REFERENCE, lt.getDependency().getGroupId(), lt.getDependency().getArtifactId()))
                     );
                 }
             });
             if (!right.isEmpty()) {
                 result.addAll(
-                        right.stream().map(n -> new Diff(null, null, getTreePath(n), String.format(MVN_REPOSITORY_REFERENCE, n.getDependency().getGroupId(), n.getDependency().getArtifactId())))
+                        right.stream().map(n -> new Diff(null, null, getTreePath(n), String.format(StringPatterns.MVN_REPOSITORY_REFERENCE, n.getDependency().getGroupId(), n.getDependency().getArtifactId())))
                                 .collect(Collectors.toList()));
             }
         }

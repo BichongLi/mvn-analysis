@@ -1,5 +1,6 @@
 package com.ea.eadp.mvn.model.dependency;
 
+import com.ea.eadp.mvn.utils.MavenUtils;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
@@ -18,6 +19,7 @@ public class DependencyWrapper {
 
     public DependencyWrapper(List<Dependency> dependencies) {
         this.dependencies = dependencies;
+        this.dependencies.forEach(MavenUtils::fillDependencyInfoFromMavenRepo);
     }
 
     public List<Dependency> getDependencies() {

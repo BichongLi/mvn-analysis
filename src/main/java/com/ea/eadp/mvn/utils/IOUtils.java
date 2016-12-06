@@ -3,11 +3,14 @@ package com.ea.eadp.mvn.utils;
 import com.ea.eadp.mvn.model.dependency.*;
 import com.ea.eadp.mvn.model.exception.AnalyzeException;
 import com.ea.eadp.mvn.model.exception.ExceptionType;
+import com.sun.corba.se.spi.orbutil.fsm.Input;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * User: BichongLi
@@ -34,20 +37,27 @@ public class IOUtils {
     }
 
     public static void print(InputStream in) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         String line;
-        try {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
             }
         } catch (IOException e) {
             throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException ignored) {
-            }
         }
+    }
+
+    public static String consumeInputStream(InputStream in) {
+        String result = "";
+        String line;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+            while ((line = reader.readLine()) != null) {
+                result += line + "\n";
+            }
+        } catch (IOException e) {
+            throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
+        }
+        return result;
     }
 
     public static void printXMLtoConsole(Object object) {
