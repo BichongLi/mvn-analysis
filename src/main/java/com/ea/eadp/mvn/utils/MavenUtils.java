@@ -34,7 +34,7 @@ public class MavenUtils {
                         "Error retrieving information from maven repository for dependency %1$s.", dependency.toString());
             }
             HttpEntity entity = response.getEntity();
-            JSONObject obj = new JSONObject(IOUtils.consumeInputStream(entity.getContent()));
+            JSONObject obj = new JSONObject(IOUtils.inputStreamToString(entity.getContent()));
             JSONObject result = (JSONObject) obj.get("response");
             if (!result.get("numFound").equals(0)) {
                 JSONObject doc = (JSONObject) result.getJSONArray("docs").get(0);

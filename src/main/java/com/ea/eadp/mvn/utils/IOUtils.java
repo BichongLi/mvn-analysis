@@ -47,7 +47,7 @@ public class IOUtils {
         }
     }
 
-    public static String consumeInputStream(InputStream in) {
+    public static String inputStreamToString(InputStream in) {
         String result = "";
         String line;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {

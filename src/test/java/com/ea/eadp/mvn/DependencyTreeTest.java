@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 public class DependencyTreeTest {
 
-    private static final String TREE_FILE = "catalogJava8.txt";
+    private static final String TREE_FILE = "catalogJava8";
     private static final String LIST_FILE = "catalogJava8List.txt";
 
     @Test
