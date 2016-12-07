@@ -58,7 +58,7 @@ public class DependencyTreeHandler extends BaseAnalyzeHandler {
 
         String outputFile = commandLine.getOptionValue(OUTPUT_FILE_PARAM);
         TreeNode treeRoot = buildDependencyTree(outputFile);
-        IOUtils.printXMLtoFile(treeRoot, outputFile);
+        IOUtils.printXMLtoFileByPath(treeRoot, outputFile);
     }
 
     private TreeNode buildDependencyTree(String filePath) {

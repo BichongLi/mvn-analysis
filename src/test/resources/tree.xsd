@@ -1,0 +1,72 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+    <xs:element name="node">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="dependency">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="groupId" type="xs:string"/>
+                            <xs:element name="artifactId" type="xs:string"/>
+                            <xs:element name="type" type="xs:string"/>
+                            <xs:element name="version" type="xs:string"/>
+                            <xs:element name="reference" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="children">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="node" minOccurs="0" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="dependency">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="groupId" type="xs:string"/>
+                                                    <xs:element name="artifactId" type="xs:string"/>
+                                                    <xs:element name="type" type="xs:string"/>
+                                                    <xs:element name="version" type="xs:string"/>
+                                                    <xs:element name="scope" type="xs:string"/>
+                                                    <xs:element name="reference" type="xs:string"/>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="children">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="node" minOccurs="0" maxOccurs="unbounded">
+                                                        <xs:complexType>
+                                                            <xs:sequence>
+                                                                <xs:element name="dependency">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence>
+                                                                            <xs:element name="groupId"
+                                                                                        type="xs:string"/>
+                                                                            <xs:element name="artifactId"
+                                                                                        type="xs:string"/>
+                                                                            <xs:element name="type" type="xs:string"/>
+                                                                            <xs:element name="version"
+                                                                                        type="xs:string"/>
+                                                                            <xs:element name="scope" type="xs:string"/>
+                                                                            <xs:element name="reference"
+                                                                                        type="xs:string"/>
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                                <xs:element name="children"/>
+                                                            </xs:sequence>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

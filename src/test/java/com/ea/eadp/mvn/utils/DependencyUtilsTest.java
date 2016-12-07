@@ -1,5 +1,6 @@
 package com.ea.eadp.mvn.utils;
 
+import com.ea.eadp.mvn.TreeBaseTest;
 import com.ea.eadp.mvn.model.dependency.Dependency;
 import com.ea.eadp.mvn.model.dependency.TreeNode;
 import com.ea.eadp.mvn.model.exception.AnalyzeException;
@@ -7,16 +8,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * User: BichongLi
  * Date: 12/7/2016
  * Time: 9:32 AM
  */
-public class DependencyUtilsTest {
+public class DependencyUtilsTest extends TreeBaseTest {
 
     @Test
     public void testSuccessfullyGenerateDependency() {
@@ -38,9 +37,7 @@ public class DependencyUtilsTest {
     public void testSuccessfullyGenerateTree() {
         List<String> edges = genCorrectTreeEdges();
         TreeNode root = DependencyUtils.generateDependencyTree(edges);
-        Assert.assertEquals("com.ea.eadp:catalog.app:war:1000.0.0-NNG-SNAPSHOT", root.getDependency().toString());
-        Assert.assertEquals(4, root.getChildren().size());
-        Assert.assertEquals(4, getDepth(root));
+        validateTree(root, "com.ea.eadp:catalog.app:war:1000.0.0-NNG-SNAPSHOT", 4, 4);
     }
 
     private List<String> genCorrectTreeEdges() {
@@ -71,20 +68,6 @@ public class DependencyUtilsTest {
         edges.add("\"com.ea.eadp:catalog.rest:jar:1000.0.0-NNG-SNAPSHOT:compile\" -> \"com.ea.eadp:catalog.common:jar:1000.0.0-NNG-SNAPSHOT:compile\"");
         edges.add("\"com.ea.eadp:catalog.service:jar:1000.0.0-NNG-SNAPSHOT:compile\" -> \"com.ea.eadp:catalog.app:war:1000.0.0-NNG-SNAPSHOT\"");
         return edges;
-    }
-
-    private int getDepth(TreeNode root) {
-        int depth = 0;
-        Set<TreeNode> currentLevel = new HashSet<>();
-        currentLevel.add(root);
-        Set<TreeNode> nextLevel = new HashSet<>();
-        while (!currentLevel.isEmpty()) {
-            depth++;
-            currentLevel.forEach(n -> nextLevel.addAll(n.getChildren()));
-            currentLevel = new HashSet<>(nextLevel);
-            nextLevel.clear();
-        }
-        return depth;
     }
 
 }

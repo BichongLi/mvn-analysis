@@ -3,14 +3,11 @@ package com.ea.eadp.mvn.utils;
 import com.ea.eadp.mvn.model.dependency.*;
 import com.ea.eadp.mvn.model.exception.AnalyzeException;
 import com.ea.eadp.mvn.model.exception.ExceptionType;
-import com.sun.corba.se.spi.orbutil.fsm.Input;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * User: BichongLi
@@ -22,8 +19,8 @@ public class IOUtils {
     private static final XStream xstream = new XStream(new DomDriver("UTF-8"));
 
     static {
-        xstream.processAnnotations(new Class[] {
-            TreeNode.class, Dependency.class, DiffResult.class, Diff.class, DependencyWrapper.class
+        xstream.processAnnotations(new Class[]{
+                TreeNode.class, Dependency.class, DiffResult.class, Diff.class, DependencyWrapper.class
         });
     }
 
@@ -36,45 +33,19 @@ public class IOUtils {
         }
     }
 
-    public static void print(InputStream in) {
-        String line;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
-        }
-    }
-
     public static String inputStreamToString(InputStream in) {
-        String result = "";
+        String result = null;
         String line;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             while ((line = reader.readLine()) != null) {
-                result += line + "\n";
+                if (result == null) result = "";
+                else result += "\n";
+                result += line;
             }
         } catch (IOException e) {
             throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
         }
         return result;
-    }
-
-    public static void printXMLtoConsole(Object object) {
-        printXMLtoFile(object, null);
-    }
-
-    public static void printXMLtoFile(Object object, String outputFile) {
-        if (outputFile == null) {
-            xstream.toXML(object, System.out);
-        } else {
-            try {
-                PrintWriter writer = new PrintWriter(new File(outputFile));
-                xstream.toXML(object, writer);
-            } catch (FileNotFoundException e) {
-                throw new AnalyzeException(ExceptionType.INVALID_REQUEST, e);
-            }
-        }
     }
 
     public static TreeNode readTreeXML(String file) {
@@ -88,4 +59,34 @@ public class IOUtils {
         root.getChildren().forEach(IOUtils::fillInParentInfo);
     }
 
+    public static void print(InputStream in) {
+        String line;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+        } catch (IOException e) {
+            throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
+        }
+    }
+
+    public static void printXMLtoConsole(Object object) {
+        printXML(object, System.out);
+    }
+
+    public static void printXMLtoFileByPath(Object object, String filePath) {
+        try {
+            printXML(object, new PrintWriter(new File(filePath)));
+        } catch (FileNotFoundException e) {
+            throw new AnalyzeException(ExceptionType.INVALID_REQUEST, "Error writing to file %1$s", filePath);
+        }
+    }
+
+    public static void printXML(Object object, OutputStream stream) {
+        xstream.toXML(object, stream);
+    }
+
+    public static void printXML(Object object, Writer writer) {
+        xstream.toXML(object, writer);
+    }
 }

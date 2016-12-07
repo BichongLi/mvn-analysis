@@ -80,7 +80,7 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
         DiffResult result = generateDiffResult(compareEachLevel(leftRoot, rightRoot));
 
         if (commandLine.hasOption(OUTPUT_FILE_PARAM)) {
-            IOUtils.printXMLtoFile(result, commandLine.getOptionValue(OUTPUT_FILE_PARAM));
+            IOUtils.printXMLtoFileByPath(result, commandLine.getOptionValue(OUTPUT_FILE_PARAM));
         } else {
             IOUtils.printXMLtoConsole(result);
         }

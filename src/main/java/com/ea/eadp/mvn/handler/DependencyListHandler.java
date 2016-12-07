@@ -69,7 +69,7 @@ public class DependencyListHandler extends BaseAnalyzeHandler {
                 .filter(d -> !IGNORE_LIST_GROUP_ID.contains(d.getGroupId()))
                 .collect(Collectors.toList());
         DependencyWrapper wrapper = new DependencyWrapper(dependencies);
-        IOUtils.printXMLtoFile(wrapper, output);
+        IOUtils.printXMLtoFileByPath(wrapper, output);
     }
 
     @Override
