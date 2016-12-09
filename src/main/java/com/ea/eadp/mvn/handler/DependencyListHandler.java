@@ -48,7 +48,7 @@ public class DependencyListHandler extends BaseAnalyzeHandler {
     protected Options getOptions() {
         Options options = super.getOptions();
         Option output = Option.builder(OUTPUT_FILE_PARAM).longOpt("Output file")
-                .hasArg().required(true).build();
+                .hasArg().build();
         options.addOption(output);
         return options;
     }
