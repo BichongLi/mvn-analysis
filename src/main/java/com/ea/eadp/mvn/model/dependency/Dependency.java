@@ -2,6 +2,7 @@ package com.ea.eadp.mvn.model.dependency;
 
 import com.ea.eadp.mvn.model.common.DependencyDiff;
 import com.ea.eadp.mvn.model.common.StringPatterns;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 import java.util.Date;
@@ -18,16 +19,22 @@ public class Dependency {
 
     private String artifactId;
 
+    @JsonIgnore
     private String type;
 
+    @JsonIgnore
     private String version;
 
+    @JsonIgnore
     private String scope;
 
+    @JsonIgnore
     private String reference;
 
+    @JsonIgnore
     private String latestVersion;
 
+    @JsonIgnore
     private Date releaseTime;
 
     public Dependency(String groupId, String artifactId,

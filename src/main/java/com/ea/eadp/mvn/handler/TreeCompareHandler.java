@@ -1,6 +1,7 @@
 package com.ea.eadp.mvn.handler;
 
 import com.ea.eadp.mvn.model.common.AnalyzeMode;
+import com.ea.eadp.mvn.model.common.Constants;
 import com.ea.eadp.mvn.model.common.DependencyDiff;
 import com.ea.eadp.mvn.model.common.StringPatterns;
 import com.ea.eadp.mvn.model.dependency.Dependency;
@@ -25,13 +26,6 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
     private static final String LEFT_TREE_PARAM = "l";
     private static final String RIGHT_TREE_PARAM = "r";
     private static final String OUTPUT_FILE_PARAM = "o";
-
-    private static final Set<String> IGNORE_CMP_VERSION_GROUP_ID = new HashSet<>();
-
-    static {
-        IGNORE_CMP_VERSION_GROUP_ID.add("com.ea.eadp");
-        IGNORE_CMP_VERSION_GROUP_ID.add("com.ea.nucleus");
-    }
 
     private static final TreeCompareHandler instance = new TreeCompareHandler();
 
@@ -108,7 +102,7 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
                     if (diff == DependencyDiff.DIFFERENT_DEPENDENCY) continue;
                     match = true;
                     if (diff == DependencyDiff.SAME) {
-                        if (IGNORE_CMP_VERSION_GROUP_ID.contains(ld.getGroupId())) {
+                        if (Constants.GROUPID_TO_ANALYZE.contains(ld.getGroupId())) {
                             leftNeedContinue.add(lt);
                             rightNeedContinue.add(rt);
                         }

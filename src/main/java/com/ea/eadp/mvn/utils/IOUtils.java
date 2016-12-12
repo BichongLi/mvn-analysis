@@ -3,6 +3,7 @@ package com.ea.eadp.mvn.utils;
 import com.ea.eadp.mvn.model.dependency.*;
 import com.ea.eadp.mvn.model.exception.AnalyzeException;
 import com.ea.eadp.mvn.model.exception.ExceptionType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import org.apache.commons.io.FileUtils;
@@ -82,11 +83,37 @@ public class IOUtils {
         }
     }
 
+    public static void printJSONtoFileByPath(Object object, String filePath) {
+        try {
+            printJSON(object, new PrintWriter(new File(filePath)));
+        } catch (FileNotFoundException e) {
+            throw new AnalyzeException(ExceptionType.INVALID_REQUEST, "Error writing to file %1$s", filePath);
+        }
+    }
+
     public static void printXML(Object object, OutputStream stream) {
         xstream.toXML(object, stream);
     }
 
     public static void printXML(Object object, Writer writer) {
         xstream.toXML(object, writer);
+    }
+
+    public static void printJSON(Object object, OutputStream stream) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            mapper.writeValue(stream, object);
+        } catch (IOException e) {
+            throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
+        }
+    }
+
+    public static void printJSON(Object object, Writer writer) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            mapper.writeValue(writer, object);
+        } catch (IOException e) {
+            throw new AnalyzeException(ExceptionType.INTERNAL_ERROR, e);
+        }
     }
 }

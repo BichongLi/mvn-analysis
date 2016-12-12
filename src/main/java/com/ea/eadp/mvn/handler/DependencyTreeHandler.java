@@ -21,6 +21,7 @@ import java.util.List;
 public class DependencyTreeHandler extends BaseAnalyzeHandler {
 
     private static final String OUTPUT_FILE_PARAM = "o";
+    private static final String OUTPUT_TYPE_PARAM = "t";
 
     private static final String MVN_COMMAND_FORMAT = "dependency:tree -DoutputFile=%1$s -DoutputType=dot";
 
@@ -38,7 +39,10 @@ public class DependencyTreeHandler extends BaseAnalyzeHandler {
         Options options = super.getOptions();
         Option outputFile = Option.builder(OUTPUT_FILE_PARAM).longOpt("Output tree structure file")
                 .hasArg().build();
+        Option outputType = Option.builder(OUTPUT_TYPE_PARAM).longOpt("Output file type [xml(default)/json]")
+                .hasArg().build();
         options.addOption(outputFile);
+        options.addOption(outputType);
         return options;
     }
 
@@ -58,6 +62,14 @@ public class DependencyTreeHandler extends BaseAnalyzeHandler {
 
         String outputFile = commandLine.getOptionValue(OUTPUT_FILE_PARAM);
         TreeNode treeRoot = buildDependencyTree(outputFile);
+        sortChildren(treeRoot);
+        if (commandLine.hasOption(OUTPUT_TYPE_PARAM)) {
+            String type = commandLine.getOptionValue(OUTPUT_TYPE_PARAM);
+            if (type.equalsIgnoreCase("json")) {
+                IOUtils.printJSONtoFileByPath(treeRoot, outputFile);
+                return;
+            }
+        }
         IOUtils.printXMLtoFileByPath(treeRoot, outputFile);
     }
 
@@ -66,5 +78,10 @@ public class DependencyTreeHandler extends BaseAnalyzeHandler {
         List<String> edges = extractUsefulInfo(file,
                 p -> StringPatterns.DEPENDENCY_TREE_EDGE_PATTERN.matcher(p).find());
         return DependencyUtils.generateDependencyTree(edges);
+    }
+
+    private void sortChildren(TreeNode root) {
+        Collections.sort(root.getChildren(), TreeNode::compareTo);
+        root.getChildren().forEach(this::sortChildren);
     }
 }
