@@ -10,6 +10,9 @@ import java.util.Set;
  */
 public class Constants {
 
+    private Constants() {
+    }
+
     public static final Set<String> GROUPID_TO_ANALYZE = new HashSet<>();
 
     static {
