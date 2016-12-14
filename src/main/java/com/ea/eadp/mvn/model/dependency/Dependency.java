@@ -22,19 +22,15 @@ public class Dependency {
     @JsonIgnore
     private String type;
 
-    @JsonIgnore
     private String version;
 
     @JsonIgnore
     private String scope;
 
-    @JsonIgnore
     private String reference;
 
-    @JsonIgnore
     private String latestVersion;
 
-    @JsonIgnore
     private Date releaseTime;
 
     public Dependency(String groupId, String artifactId,

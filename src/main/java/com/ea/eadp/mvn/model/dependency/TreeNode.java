@@ -21,6 +21,8 @@ public class TreeNode implements Comparable<TreeNode> {
 
     private Dependency dependency;
 
+    private Dependency suggestDependency;
+
     @XStreamOmitField
     @JsonIgnore
     private TreeNode parent;
@@ -37,6 +39,14 @@ public class TreeNode implements Comparable<TreeNode> {
 
     public void setDependency(Dependency dependency) {
         this.dependency = dependency;
+    }
+
+    public Dependency getSuggestDependency() {
+        return suggestDependency;
+    }
+
+    public void setSuggestDependency(Dependency suggestDependency) {
+        this.suggestDependency = suggestDependency;
     }
 
     public TreeNode getParent() {

@@ -55,6 +55,10 @@ public class IOUtils {
         return root;
     }
 
+    public static DependencyWrapper readDependencyXML(String file) {
+        return (DependencyWrapper) xstream.fromXML(new File(file));
+    }
+
     private static void fillInParentInfo(TreeNode root) {
         root.getChildren().forEach(n -> n.setParent(root));
         root.getChildren().forEach(IOUtils::fillInParentInfo);
