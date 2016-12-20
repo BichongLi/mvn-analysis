@@ -24,6 +24,8 @@ args for dependencyTree:
  
  -t,--Output file type <arg> [xml(default)/json]
  
+ -b,--Base dependency set file <arg>
+ 
  -jh,--Java home <arg>
  
  -mh,--Maven home <arg>
