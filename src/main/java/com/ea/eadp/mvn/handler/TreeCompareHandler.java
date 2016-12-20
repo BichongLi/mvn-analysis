@@ -101,11 +101,9 @@ public class TreeCompareHandler extends BaseAnalyzeHandler {
                     DependencyDiff diff = ld.compare(rd);
                     if (diff == DependencyDiff.DIFFERENT_DEPENDENCY) continue;
                     match = true;
-                    if (diff == DependencyDiff.SAME) {
-                        if (Constants.GROUPID_TO_ANALYZE.contains(ld.getGroupId())) {
-                            leftNeedContinue.add(lt);
-                            rightNeedContinue.add(rt);
-                        }
+                    if (diff == DependencyDiff.SAME && Constants.GROUPID_TO_ANALYZE.contains(ld.getGroupId())) {
+                        leftNeedContinue.add(lt);
+                        rightNeedContinue.add(rt);
                     } else {
                         result.add(new Diff(
                                 diff, ld.toString(), rd.toString(),

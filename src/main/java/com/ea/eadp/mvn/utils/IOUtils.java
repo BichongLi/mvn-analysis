@@ -59,6 +59,10 @@ public class IOUtils {
         return (DependencyWrapper) xstream.fromXML(new File(file));
     }
 
+    public static DiffResult readDiffResultXML(String file) {
+        return (DiffResult) xstream.fromXML(new File(file));
+    }
+
     private static void fillInParentInfo(TreeNode root) {
         root.getChildren().forEach(n -> n.setParent(root));
         root.getChildren().forEach(IOUtils::fillInParentInfo);
